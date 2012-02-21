@@ -37,8 +37,8 @@ def train():
 	print 'training...'
 		
 def main():
-	ser = SerialCommunication(callback)
-	#ser = SerialCommunication(timingCallback)
+	#ser = SerialCommunication(callback)
+	ser = SerialCommunication(timingCallback)
 	#ser = SerialCommunication(toFileCallback)
 	
 	ser.Start(channels)

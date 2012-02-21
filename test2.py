@@ -1,6 +1,9 @@
 from serialCom import *
 from keyListener import *
 from bpnn import NN
+from analyze import *
+import functools
+import sys
 
 channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
 numChannels = getNumChannels(channels)
@@ -15,11 +18,11 @@ testingPredictions = []
 
 nn = None
 
-def saveTrainingData(data):
-	f = open('data.txt', 'w')
+def saveTrainingData(data, filename = 'data.txt'):
+	f = open(filename, 'w')
 	for (input, output) in data:
-		f.write('\t'.join([str(input), str(output)]) + '\n')
-	
+		#f.write('\t'.join([str(input), str(output)]) + '\n')
+		f.write(','.join(str(x) for x in input + output) + '\n')
 	f.close()
 
 def trainCallback(data):
@@ -36,7 +39,7 @@ def testCallback(data):
 	
 	print '\t'.join([str(x) for x in output]) + '\t\t' + '='*int(output[0] * 10) + '_'*int(10 - output[0] * 10)
 	
-def getTrainedNetwork():
+def getTrainingData():
 	global channels, numChannels, numOutputs, numHiddenNodes
 	
 	ser = SerialCommunication(trainCallback)	
@@ -47,11 +50,35 @@ def getTrainedNetwork():
 	ser.Stop()
 	time.sleep(1)	#just to make sure we don't have some concurrency problem
 	
-	nn = NN(numChannels * FOURIER_BINS, numHiddenNodes, numOutputs)
-	
 	data = globals()['trainingData']
-	saveTrainingData(data)
 	print 'number of training instances: %s' % len(data)
+	return data
+	
+def dividingLineCallback(line, data):
+	pressed = sum(data) > line
+	sys.stdout.write('\b' * 6 + str(pressed))
+	
+def RunDividingLine():
+	trainingData = getTrainingData()
+	
+	#convert to the format required
+	saveTrainingData(trainingData, 'data2.txt')
+	formatted = [input + output for input, output in trainingData]
+	
+	line = getDividingLine(formatted)
+	classifier = functools.partial(dividingLineCallback, line)
+	
+	ser = SerialCommunication(classifier)
+	ser.Start(channels)
+	print 'Hit enter to stop testing'
+	s = raw_input()
+	ser.Stop()
+
+def getTrainedNetwork():
+	data = getTrainingData()
+	saveTrainingData(data)
+	
+	nn = NN(numChannels * FOURIER_BINS, numHiddenNodes, numOutputs)
 	
 	nn.train(data)
 	
@@ -65,10 +92,13 @@ def useNetworkToPredict(nn):
 	ser.Stop()
 	
 def main():
-	global nn
-	nn = getTrainedNetwork()
-	useNetworkToPredict(nn)
+	#Neural network stuff
+	#global nn
+	#nn = getTrainedNetwork()
+	#useNetworkToPredict(nn)
 	
+	#simple dividing line on sum stuff
+	RunDividingLine()
 	
 if __name__ == "__main__":
 	main()
