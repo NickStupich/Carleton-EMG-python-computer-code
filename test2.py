@@ -3,6 +3,7 @@ from keyListener import *
 from bpnn import NN
 import functools
 import sys
+import helpers
 
 """Classifiers:
 all classifiers should have two functions to be used:
@@ -64,6 +65,7 @@ def trainAndPredict(module):
 	trainingData = getTrainingData()
 	
 	saveTrainingData(trainingData, 'data.txt')
+	trainingData = helpers.removeTransitionDataPoints()
 	
 	#train the classifier, and get the data it needs to classify future data
 	model = module.getClassifyData(trainingData)
