@@ -3,8 +3,8 @@ import math
 import datetime
 import helpers
 
-#filename = 'data2_ringFinger2.txt'
-filename = 'test2outputs.txt'
+filename = 'data2_ringFinger_2.txt'
+#filename = 'test2outputs.txt'
 
 def loadData(fn):
 	f = open(fn)
@@ -52,11 +52,11 @@ def classifyFunction(models, inputs, callback = None):
 	states = []			#contains just the 1 or 0
 	
 	for model in models:
-		prediction = svm_predict([0], inputs, model)
+		prediction = svm_predict([0], [inputs], model)
 		state = prediction[0][0]
 		
 		predictions.append(prediction)
-		states.append(states)
+		states.append(state)
 
 	if callback:
 		callback(states)
@@ -98,7 +98,7 @@ def main():
 	matrices = [[[0, 0], [0, 0]] for _ in range(numOutputs)]
 	for d in testing:
 		inputs = d[:-1]
-		predictData = classifyFunction(model, inputs)
+		predictData = classifyFunction(model, inputs[0])
 		
 		predictions = [int(x[0][0]) for x in predictData]
 		answers = d[-1]
@@ -127,13 +127,13 @@ def main():
 		relativeWeights = [x/largest for x in frequencyWeights]
 		print '\n'.join(str(x) for x in relativeWeights)
 	
-	if 0:
+	if 1:
 		print '\n manual predictions based on extract weights vs model predictions'
 		for d in testing:
 			inputs = d[:-1][0]
 			answer = d[-1]
 			pred1 = [sum([t * w for w, t in zip(wv[1:], inputs)]) - wv[0] for wv in weights]
-			pred2 = [x[2][0][0] for x in classifyFunction(modelComplete, [inputs])]
+			pred2 = [x[2][0][0] for x in classifyFunction(modelComplete, inputs)]
 			print pred1, pred2, answer
 	
 if __name__ == "__main__":

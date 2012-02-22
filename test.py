@@ -56,8 +56,6 @@ class KeyTestThread(Thread):
 			time.sleep(0.5)
 			print kl.getOutputs()
 	
-	
-	
 def main2():
 	ktt = KeyTestThread()
 	ktt.start()

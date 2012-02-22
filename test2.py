@@ -18,11 +18,10 @@ import svmClassifier
 
 channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
 numChannels = getNumChannels(channels)
-numOutputs = 1 	#number of keys that can be pushed
 
 numHiddenNodes = 2	#number of hidden nodes in the neural network
 
-keyListener = KeyListener(numOutputs)
+keyListener = KeyListener(numChannels)
 
 trainingData = []
 testingPredictions = []
@@ -31,16 +30,19 @@ nn = None
 
 def saveTrainingData(data, filename = 'data.txt'):
 	f = open(filename, 'w')
+	f.write(str(len(data[0][1])) + '\n')
 	for (input, output) in data:
 		#f.write('\t'.join([str(input), str(output)]) + '\n')
+		
 		f.write(','.join(str(x) for x in input + output) + '\n')
 	f.close()
 
 def trainCallback(data):
 	global trainingData
 	
-	print data
 	keyState = globals()['keyListener'].getOutputs()
+	print data, keyState
+	
 	trainingData.append((data, keyState))
 	
 def getTrainingData():
@@ -59,13 +61,13 @@ def getTrainingData():
 	return data
 	
 def postClassifyCallback(state):
-	sys.stdout.write('\b' * 6 + str(state))
+	sys.stdout.write('\b' * 10 * len(state) + '\t'.join([str(s) for s in state]))
 	
 def trainAndPredict(module):
 	trainingData = getTrainingData()
 	
 	saveTrainingData(trainingData, 'data.txt')
-	trainingData = helpers.removeTransitionDataPoints()
+	trainingData = helpers.removeTransitionDataPoints(trainingData)
 	
 	#train the classifier, and get the data it needs to classify future data
 	model = module.getClassifyData(trainingData)

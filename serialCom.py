@@ -3,7 +3,7 @@ from threading import Thread
 import time
 
 #serial port details
-_port = "COM14"
+_port = "COM4"
 _baud = 57600
 
 #delay once the serial port read() doesn't immediately return anything (in seconds)

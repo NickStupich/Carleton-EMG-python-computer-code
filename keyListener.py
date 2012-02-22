@@ -1,10 +1,11 @@
 import ctypes
 from ctypes.wintypes import *
 
-keys = ['G', 'H', 'J']
+keys = ['F', 'G', 'H', 'J', 'K', 'L']
 
 class KeyListener():
 	def __init__(self, numOutputs):
+		print 'KeyListener initialized with %s keys being listened' % numOutputs
 		self.keys = globals()['keys'][:numOutputs]
 		
 	def getOutputs(self):
