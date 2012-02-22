@@ -1,10 +1,10 @@
 import math
 
-filename = 'data.txt'
+filename = 'data2_ringFinger.txt'
 
 def loadData(fn):
 	f = open(fn)
-	lines = f.read().split('\n')
+	lines = f.read().strip('\n').split('\n')
 	data = map(lambda x: [int(y) for y in x.split(',')], lines)
 	return data
 
@@ -57,6 +57,19 @@ def getDividingLine(data):
 	
 	return line
 
+def getClassifyData(data):
+	#convert to the format required
+	formatted = [input + output for input, output in data]
+	
+	return getDividingLine(formatted)
+	
+def classifyFunction(model, inputs, callback = None):
+	prediction = sum(inputs) > model
+	if callback:
+		callback(prediction)
+		
+	return prediction
+	
 def main():
 	data = loadData(filename)
 	line = getDividingLine(data)

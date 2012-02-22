@@ -1,9 +1,19 @@
 from serialCom import *
 from keyListener import *
 from bpnn import NN
-from analyze import *
 import functools
 import sys
+
+"""Classifiers:
+all classifiers should have two functions to be used:
+	getClassifyData(data):
+		takes a list of data points, where the last value is the output to be predicted
+		returns any kind of data structure that will be passed to the classifyFunction for that module
+	classifyFunction(data, inputs, callback):
+		takes a data structure containing model info, classifies inputs into a class, and calls the callback function
+"""
+import divideByMeans
+import svmClassifier
 
 channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
 numChannels = getNumChannels(channels)
@@ -32,13 +42,6 @@ def trainCallback(data):
 	keyState = globals()['keyListener'].getOutputs()
 	trainingData.append((data, keyState))
 	
-def testCallback(data):
-	global nn, testingPredictions
-	output = nn.update(data)
-	testingPredictions.append((data, output))
-	
-	print '\t'.join([str(x) for x in output]) + '\t\t' + '='*int(output[0] * 10) + '_'*int(10 - output[0] * 10)
-	
 def getTrainingData():
 	global channels, numChannels, numOutputs, numHiddenNodes
 	
@@ -54,51 +57,33 @@ def getTrainingData():
 	print 'number of training instances: %s' % len(data)
 	return data
 	
-def dividingLineCallback(line, data):
-	pressed = sum(data) > line
-	sys.stdout.write('\b' * 6 + str(pressed))
+def postClassifyCallback(state):
+	sys.stdout.write('\b' * 6 + str(state))
 	
-def RunDividingLine():
+def trainAndPredict(module):
 	trainingData = getTrainingData()
 	
-	#convert to the format required
-	saveTrainingData(trainingData, 'data2.txt')
-	formatted = [input + output for input, output in trainingData]
+	saveTrainingData(trainingData, 'data.txt')
 	
-	line = getDividingLine(formatted)
-	classifier = functools.partial(dividingLineCallback, line)
+	#train the classifier, and get the data it needs to classify future data
+	model = module.getClassifyData(trainingData)
 	
+	#get a partial function of the classifying function, with the data already included
+	classifier = functools.partial(module.classifyFunction, model, callback = postClassifyCallback)
+	
+	#restart the serial communication to get current muscle data
 	ser = SerialCommunication(classifier)
 	ser.Start(channels)
-	print 'Hit enter to stop testing'
-	s = raw_input()
-	ser.Stop()
-
-def getTrainedNetwork():
-	data = getTrainingData()
-	saveTrainingData(data)
 	
-	nn = NN(numChannels * FOURIER_BINS, numHiddenNodes, numOutputs)
-	
-	nn.train(data)
-	
-	return nn
-	
-def useNetworkToPredict(nn):
-	ser = SerialCommunication(testCallback)
-	ser.Start(channels)
 	print 'Hit enter to stop testing'
 	s = raw_input()
 	ser.Stop()
 	
 def main():
-	#Neural network stuff
-	#global nn
-	#nn = getTrainedNetwork()
-	#useNetworkToPredict(nn)
+	#classifier = divideByMeans
+	classifier = svmClassifier
 	
-	#simple dividing line on sum stuff
-	RunDividingLine()
+	trainAndPredict(classifier)
 	
 if __name__ == "__main__":
 	main()

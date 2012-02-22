@@ -1,7 +1,7 @@
 import ctypes
 from ctypes.wintypes import *
 
-keys = ['G']
+keys = ['G', 'H', 'J']
 
 class KeyListener():
 	def __init__(self, numOutputs):
