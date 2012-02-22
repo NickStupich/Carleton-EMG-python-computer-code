@@ -18,3 +18,15 @@ def removeTransitionDataPoints(data):
 			
 	print 'ignored %s points at state transitions' % ignoredCount
 	return result
+	
+
+"""scales inputs between 0-1 based on the largest value in the inputs"""
+def scaleInputs(inputs, scalingValue = None):
+	if scalingValue is None:
+		largest = max(map(lambda x: max(x), inputs))
+	
+	scaled = []
+	for input in inputs:
+		scaled.append([float(x) / largest for x in input])
+		
+	return scaled
