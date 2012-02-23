@@ -1,9 +1,10 @@
 from serialCom import *
 import time
 from keyListener import *
+import helpers
 
-channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
-numChannels = getNumChannels(channels)
+channels = sum([x<<i for i, x in enumerate([0, 1, 0, 0, 0, 0])])
+numChannels = helpers.getNumChannels(channels)
 
 count = 0
 start = None

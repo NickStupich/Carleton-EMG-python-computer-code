@@ -3,6 +3,8 @@ from keyListener import *
 import sys
 import helpers
 import time
+from continuous import covarianceLinearFit
+
 
 trainingOutputs = [0.5, 1.0]	#0% is gathered once for all channels as well
 trainingPeriod = 2.0			# in seconds
@@ -69,12 +71,26 @@ def saveTrainingData(data, filename = 'data_continuous.txt'):
 	f.write('\n'.join(['\t'.join([str(x) for x in input + output]) for input, output in data]))
 	f.close()
 	
-
+def postClassifyCallback(output):
+	sys.stdout.write('\b' * len(output) * 20 + '\t'.join(str(x) for x in output))
 	
 def main():
+	module = covarianceLinearFit
+	
 	data = getTrainingData()
 	saveTrainingData(data)
+	model = module.getModel(data)
 	
+	classifier = functools.partial(module.classifyFunction, model,
+	callback = postClassifyCallback)
+	
+	#restart the serial communication to get current muscle data
+	ser = SerialCommunication(classifier)
+	ser.Start(channels)
+	
+	print 'Hit enter to stop testing'
+	s = raw_input()
+	ser.Stop()
 	
 if __name__ == "__main__":
 	main()
