@@ -1,6 +1,8 @@
 import serial
 from threading import Thread
 import time
+import helpers
+from helpers import FOURIER_BINS, NUM_CHANNELS
 
 #serial port details
 _port = "COM4"
@@ -10,8 +12,6 @@ _baud = 57600
 _readDelay = 0.01
 
 #protocol details
-NUM_CHANNELS = 6
-FOURIER_BINS = 8
 CONTROL_BYTE = 255
 
 DEBUG_ON = True
@@ -19,14 +19,6 @@ DEBUG_ON = True
 def debug(s):
 		if DEBUG_ON:
 			print s
-
-def getNumChannels(channels):
-	numChannels = 0
-	for i in range(NUM_CHANNELS):
-		if (1<<i) & channels:
-			numChannels += 1
-	
-	return numChannels
 			
 """enums"""
 class ExpectedNext:
@@ -39,7 +31,7 @@ class FFTInfo:
 	def __init__(self, channels):
 		
 		#get the number of channels being used
-		self.numChannels = getNumChannels(channels)				
+		self.numChannels = helpers.getNumChannels(channels)				
 		print 'numChannels: %s' % self.numChannels
 		
 		self.gains = [-1]*self.numChannels

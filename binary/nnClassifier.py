@@ -1,4 +1,6 @@
 
+numHiddenNodes = 2	#number of hidden nodes in the neural network
+
 def getTrainedNetwork():
 	data = getTrainingData()
 	saveTrainingData(data)

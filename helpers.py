@@ -1,3 +1,7 @@
+NUM_CHANNELS = 6
+FOURIER_BINS = 8
+
+
 distance = 2
 
 def removeTransitionDataPoints(data):
@@ -30,3 +34,11 @@ def scaleInputs(inputs, scalingValue = None):
 		scaled.append([float(x) / largest for x in input])
 		
 	return scaled
+	
+def getNumChannels(channels):
+	numChannels = 0
+	for i in range(NUM_CHANNELS):
+		if (1<<i) & channels:
+			numChannels += 1
+	
+	return numChannels

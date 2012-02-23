@@ -13,13 +13,11 @@ all classifiers should have two functions to be used:
 	classifyFunction(data, inputs, callback):
 		takes a data structure containing model info, classifies inputs into a class, and calls the callback function
 """
-import divideByMeans
-import svmClassifier
+from binary import divideByMeans
+from binary import svmClassifier
 
 channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
-numChannels = getNumChannels(channels)
-
-numHiddenNodes = 2	#number of hidden nodes in the neural network
+numChannels = helpers.getNumChannels(channels)
 
 keyListener = KeyListener(numChannels)
 
@@ -73,7 +71,7 @@ def trainAndPredict(module):
 	model = module.getClassifyData(trainingData)
 	
 	#get a partial function of the classifying function, with the data already included
-	classifier = functools.partial(module.classifyFunction, model, callback = postClassifyCallback)
+	classifier = functools.partial(module.classifyFunction, model,callback = postClassifyCallback)
 	
 	#restart the serial communication to get current muscle data
 	ser = SerialCommunication(classifier)
