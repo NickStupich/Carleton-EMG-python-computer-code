@@ -4,27 +4,34 @@ import stats
 class Model():
 	def __init__(self, numInputs, numOutputs):
 		self.__numInputs = numInputs
-		self.__numOutputs = numOuputs
+		self.__numOutputs = numOutputs
 		
-		self.pearsons = [[None for x in range(numInputs)] for y in range(numOutputs)]
+		self.pearsons = [[None for x in range(numOutputs)] for y in range(numInputs)]
 		
-		self.yInts = [[None for x in range(numInputs)] for y in range(numOutputs)]
+		self.yInts = [[None for x in range(numOutputs)] for y in range(numInputs)]
 		
-		self.slopes = [[None for x in range(numInputs)] for y in range(numOutputs)]
+		self.slopes = [[None for x in range(numOutputs)] for y in range(numInputs)]
 		
 	def getOutput(self, input):
 		result = []
-		for i in range(self.numOutputs):
+		for i in range(self.__numOutputs):
 			num = 0
 			denom = 0
-			for j in range(self.numInputs):
-				pred = self.yInts[j][i] + self.slopes[j][i] * input[j][i]
-				num += pred * self.pearsons[j][i]
+			for j in range(self.__numInputs):
+				predicted = self.yInts[j][i] + self.slopes[j][i] * input[j]
+				num += predicted * self.pearsons[j][i]
 				denom += abs(self.pearsons[j][i])
 				
 			result.append(num / denom)
 			
 		return result
+		
+	def save(self, filename = "covLinModel.txt"):
+		f = open(filename, 'w')
+		f.write(','.join(str(x) for x in [self.__numInputs, self.__numOutputs]) + '\n')
+		f.write(','.join(str(x) for x in self.pearsons) + '\n')
+		f.write(','.join(str(x) for x in self.yInts) + '\n')
+		f.write(','.join(str(x) for x in self.slopes) + '\n')
 				
 def getModel(data):
 	numInputs = len(data[0][0])
@@ -52,6 +59,7 @@ def getModel(data):
 			model.slopes[input][output] = slope
 			model.yInts[input][output] = yInt
 			
+	return model
 			
 def classifyFunction(model, input, callback = None):
 	result = model.getOutput(input)

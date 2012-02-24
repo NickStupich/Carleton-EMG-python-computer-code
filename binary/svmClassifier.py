@@ -3,8 +3,8 @@ import math
 import datetime
 import helpers
 
-filename = 'data2_ringFinger_2.txt'
-#filename = 'test2outputs.txt'
+#filename = 'data2_ringFinger_2.txt'
+filename = '../data.txt'
 
 def loadData(fn):
 	f = open(fn)

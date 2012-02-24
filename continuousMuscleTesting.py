@@ -4,13 +4,14 @@ import sys
 import helpers
 import time
 from continuous import covarianceLinearFit
+import functools
 
 
 trainingOutputs = [0.5, 1.0]	#0% is gathered once for all channels as well
-trainingPeriod = 2.0			# in seconds
-prepareDelay = 2
+trainingPeriod = 1.0			# in seconds
+prepareDelay = 1
 
-channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
+channels = sum([x<<i for i, x in enumerate([0, 1, 0, 0, 0, 0])])
 numChannels = helpers.getNumChannels(channels)
 
 keyListener = KeyListener(numChannels)
@@ -62,17 +63,30 @@ def getTrainingData():
 		
 	print 'Done all training data gathering'
 	ser.Stop()
+	time.sleep(1)	#otherwise get access denied exception when try to open
 	return trainingData
 			
 def saveTrainingData(data, filename = 'data_continuous.txt'):
 	f = open(filename, 'w')
 	f.write(str(numChannels) + '\n')
-	print data
 	f.write('\n'.join(['\t'.join([str(x) for x in input + output]) for input, output in data]))
 	f.close()
 	
-def postClassifyCallback(output):
-	sys.stdout.write('\b' * len(output) * 20 + '\t'.join(str(x) for x in output))
+def postClassifyCallback(outputs):
+	l = 20
+	s = ''
+	for output in outputs:
+		x = min(int(output * l), l * 2)
+		si = '*' * x + ' ' * (l*2-x) + '\t\t'
+		si1 = si[:l]
+		si2 = si[l+1:]
+		s += si1 + '|' + si2
+		
+	#print s
+	x = '\b' * len(outputs) * l * 3 + s
+	print x
+	#sys.stdout.write(x)
+	#sys.stdout.write('\b' * len(outputs) * 20 + '\t'.join(str(x) for x in outputs))
 	
 def main():
 	module = covarianceLinearFit

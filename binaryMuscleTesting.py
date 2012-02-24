@@ -16,7 +16,7 @@ all classifiers should have two functions to be used:
 from binary import divideByMeans
 from binary import svmClassifier
 
-channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
+channels = sum([x<<i for i, x in enumerate([0, 1, 1, 1, 1, 1])])
 numChannels = helpers.getNumChannels(channels)
 
 keyListener = KeyListener(numChannels)
