@@ -40,6 +40,18 @@ def lineOfBestFit(lx, ly):
 	
 	return (slope, yint)
 	
+#fits a set of points to the function 1 - e^(a*x + b)
+def exponentialDecayFit(lx, ly):
+	logy = [-math.log(1.0 - min(0.995, y)) for y in ly]
+	(decay, offset) = lineOfBestFit(lx, logy)
+	return (decay, offset)
+	
+def lineInterpolation(input, params):
+	return params[0] * input + params[1]
+	
+def exponentialInterpolation(input, params):
+	#also require the output to be >=0
+	return max(0.0, 1.0 - math.exp(-params[0] * input + params[1]))
 	
 if __name__ == "__main__":
 	l1 = [0, 1, 2]

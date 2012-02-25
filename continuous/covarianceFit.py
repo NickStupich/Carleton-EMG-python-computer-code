@@ -1,6 +1,25 @@
 import helpers
 import stats
 
+if 0:  #for a linear fit
+	fittingFunction = stats.lineOfBestFit
+	interpolatingFunction = stats.lineInterpolation
+
+else: #for a decaying exponential fit
+	fittingFunction = stats.exponentialDecayFit
+	interpolatingFunction = stats.exponentialInterpolation
+
+def loadData(fn = '../data_continuous_.txt'):
+	f = open(fn)
+	numOutputs = int(f.readline())
+	result = []
+	for line in f:
+		d = [int(x) for x in line.split('\t')[:-numOutputs]]
+		o = [float(x) for x in line.split('\t')[-numOutputs:]]
+		result.append((d, o))
+		
+	return result
+
 class Model():
 	def __init__(self, numInputs, numOutputs):
 		self.__numInputs = numInputs
@@ -18,7 +37,7 @@ class Model():
 			num = 0
 			denom = 0
 			for j in range(self.__numInputs):
-				predicted = self.yInts[j][i] + self.slopes[j][i] * input[j]
+				predicted = interpolatingFunction(input[j], (self.slopes[j][i], self.yInts[j][i]))
 				num += predicted * self.pearsons[j][i]
 				denom += abs(self.pearsons[j][i])
 				
@@ -28,10 +47,20 @@ class Model():
 		
 	def save(self, filename = "covLinModel.txt"):
 		f = open(filename, 'w')
-		f.write(','.join(str(x) for x in [self.__numInputs, self.__numOutputs]) + '\n')
-		f.write(','.join(str(x) for x in self.pearsons) + '\n')
-		f.write(','.join(str(x) for x in self.yInts) + '\n')
-		f.write(','.join(str(x) for x in self.slopes) + '\n')
+		s = self.getDescription()
+		f.write(s)
+		f.close()
+				
+	def printModel(self):
+		s = self.getDescription()
+		print s
+		
+	def getDescription(self):
+		s = ','.join(str(x) for x in [self.__numInputs, self.__numOutputs]) + '\n' \
+		+ ','.join(str(x) for x in self.pearsons) + '\n' \
+		+ ','.join(str(x) for x in self.yInts) + '\n' \
+		+ ','.join(str(x) for x in self.slopes) + '\n'
+		return s
 				
 def getModel(data):
 	numInputs = len(data[0][0])
@@ -55,7 +84,8 @@ def getModel(data):
 			
 			#get the slope and y-int of the line of best fit between in put and output
 			
-			(slope, yInt) = stats.lineOfBestFit(x, y)
+			(slope, yInt) = fittingFunction(x, y)
+			
 			model.slopes[input][output] = slope
 			model.yInts[input][output] = yInt
 			
@@ -68,4 +98,21 @@ def classifyFunction(model, input, callback = None):
 		
 	return result
 			
-			
+if __name__ == "__main__":
+	data = loadData()
+	model = getModel(data)
+	model.printModel()
+	
+	#get some idea of the level of errors
+	totalError = 0
+	for input, output in data:
+		pred = model.getOutput(input)
+		err = sum([(p-o)**2.0 for p, o in zip(pred, output)])
+		totalError += err
+		
+	averageError = totalError / len(data)
+	
+	print 'average distance squared between predicted and actual output: %s' % averageError
+		
+		
+	
