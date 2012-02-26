@@ -6,7 +6,6 @@ import time
 from continuous import covarianceFit
 import functools
 
-
 trainingOutputs = [0.5, 1.0]	#0% is gathered once for all channels as well
 trainingPeriod = 2.0			# in seconds
 prepareDelay = 2
@@ -82,11 +81,8 @@ def postClassifyCallback(outputs):
 		si2 = si[l+1:]
 		s += si1 + '|' + si2
 		
-	#print s
 	x = '\b' * len(outputs) * l * 3 + s
 	print x
-	#sys.stdout.write(x)
-	#sys.stdout.write('\b' * len(outputs) * 20 + '\t'.join(str(x) for x in outputs))
 	
 def main():
 	module = covarianceFit
