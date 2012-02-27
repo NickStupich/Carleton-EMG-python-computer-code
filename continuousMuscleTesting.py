@@ -6,7 +6,6 @@ import time
 from continuous import covarianceFit
 import functools
 
-
 trainingOutputs = [0.5, 1.0]	#0% is gathered once for all channels as well
 trainingPeriod = 2.0			# in seconds
 prepareDelay = 2

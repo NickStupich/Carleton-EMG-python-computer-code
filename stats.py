@@ -46,6 +46,51 @@ def exponentialDecayFit(lx, ly):
 	(decay, offset) = lineOfBestFit(lx, logy)
 	return (decay, offset)
 	
+"""#fit based on a line of best fit with the y-intercept forced to pass through group 0
+def sigmoidalFit(lx, ly):	
+
+	group0 = [x for x, y in zip(lx, ly) if y == 0.0]
+	#used as offset for function
+	offset = mean(group0)
+	print 'offset: %s' % offset
+	#1.01 used to avoid divide by 0 error
+	invSigmoidY = [math.log(-1.0 / min(y-1.0, -0.1)) for y in ly]
+	
+	#find average slope of resulting function
+	slopes = [(y-offset) / x for (x, y) in zip(lx, invSigmoidY)]
+	slope = mean(slopes)
+	
+	return (slope, offset)
+	
+	#print ly
+	#print invSigmoidY
+	#exit()
+	#(scale, offset) = lineOfBestFit(lx, invSigmoidY)
+	#return (scale, offset)
+"""
+
+#fit based on finding the horizontal shift from group 0, parameter scaling from group 0.5
+def sigmoidalFit(lx, ly):
+	(group0, group1, group2) = [[x for x, y in zip(lx, ly) if y == output] for output in [0.0, 0.5, 1.0]]
+	mean0 = mean(group0)
+	mean1 = mean(group1) 
+	
+	offset = mean0
+	#solve for a in f(x) = 0.5 = 1 / (1 + exp(-ax+b)), where b is the y-int, a is mean1
+	#scaling = (offset - math.log(1.0 / 0.5 - 1)) / mean1
+	scaling = offset / mean1
+	
+	return (scaling, offset)
+	
+"""
+def sigmoidalInterpolation(input, params):
+	print (params[0] * input + params[1]), max((params[0] * input + params[1]), -100)
+	return 1.0 / (1.0 + math.exp(max(params[0] * input + params[1], -100)))
+"""
+
+def sigmoidalInterpolation(input, params):
+	return 1.0 / (1.0 + math.exp(-params[0] * input + params[1]))
+	
 def lineInterpolation(input, params):
 	return params[0] * input + params[1]
 	
