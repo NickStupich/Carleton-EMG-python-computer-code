@@ -5,8 +5,9 @@ class FitType:
 	LINEAR = 1
 	EXPONENTIAL = 2
 	SIGMOIDAL = 3
+	LOG_LINEAR = 4
 	
-fitType = FitType.LINEAR
+fitType = FitType.LOG_LINEAR
 
 if fitType == FitType.LINEAR:  #for a linear fit
 	fittingFunction = stats.lineOfBestFit
@@ -20,7 +21,11 @@ elif fitType == FitType.SIGMOIDAL:
 	fittingFunction = stats.sigmoidalFit
 	interpolatingFunction = stats.sigmoidalInterpolation
 
-def loadData(fn = '../data_continuous_.txt'):
+elif fitType == FitType.LOG_LINEAR:
+	fittingFunction = stats.logLinearFit
+	interpolatingFunction = stats.logLinearInterpolation
+
+def loadData(fn = '../data_continuous_good.txt'):
 	f = open(fn)
 	numOutputs = int(f.readline())
 	result = []
