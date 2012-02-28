@@ -23,6 +23,7 @@ keyListener = KeyListener(numChannels)
 
 trainingData = []
 testingPredictions = []
+module = svmClassifier
 
 nn = None
 
@@ -58,10 +59,13 @@ def getTrainingData():
 	print 'number of training instances: %s' % len(data)
 	return data
 	
+def getModelFromData(data):
+	return module.getClassifyData(data)
+	
 def postClassifyCallback(state):
 	sys.stdout.write('\b' * 10 * len(state) + '\t'.join([str(s) for s in state]))
 	
-def trainAndPredict(module):
+def trainAndPredict():
 	trainingData = getTrainingData()
 	
 	saveTrainingData(trainingData, 'data.txt')
@@ -82,10 +86,7 @@ def trainAndPredict(module):
 	ser.Stop()
 	
 def main():
-	#classifier = divideByMeans
-	classifier = svmClassifier
-	
-	trainAndPredict(classifier)
+	trainAndPredict()
 	
 if __name__ == "__main__":
 	main()
