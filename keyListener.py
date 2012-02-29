@@ -18,3 +18,10 @@ class KeyListener():
 			result.append(1 if down else 0)
 		
 		return result
+		
+	def getSpecificKeyOutput(self, key):
+		user32 = ctypes.windll.user32
+		user32.GetAsyncKeyState.restype = WORD
+		user32.GetAsyncKeyState.argtypes = [ctypes.c_char]
+		down = user32.GetAsyncKeyState(key)
+		return 1 if down else 0

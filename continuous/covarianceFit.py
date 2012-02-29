@@ -1,15 +1,31 @@
 import helpers
 import stats
 
-if 0:  #for a linear fit
+class FitType:
+	LINEAR = 1
+	EXPONENTIAL = 2
+	SIGMOIDAL = 3
+	LOG_LINEAR = 4
+	
+fitType = FitType.LOG_LINEAR
+
+if fitType == FitType.LINEAR:  #for a linear fit
 	fittingFunction = stats.lineOfBestFit
 	interpolatingFunction = stats.lineInterpolation
 
-else: #for a decaying exponential fit
+elif fitType == FitType.EXPONENTIAL: #for a decaying exponential fit
 	fittingFunction = stats.exponentialDecayFit
 	interpolatingFunction = stats.exponentialInterpolation
+	
+elif fitType == FitType.SIGMOIDAL:
+	fittingFunction = stats.sigmoidalFit
+	interpolatingFunction = stats.sigmoidalInterpolation
 
-def loadData(fn = '../data_continuous_.txt'):
+elif fitType == FitType.LOG_LINEAR:
+	fittingFunction = stats.logLinearFit
+	interpolatingFunction = stats.logLinearInterpolation
+
+def loadData(fn = '../data_continuous_good.txt'):
 	f = open(fn)
 	numOutputs = int(f.readline())
 	result = []
@@ -103,12 +119,20 @@ if __name__ == "__main__":
 	model = getModel(data)
 	model.printModel()
 	
+	f = open('fit estimates.txt', 'w')
+	channel = 1
+	
 	#get some idea of the level of errors
 	totalError = 0
 	for input, output in data:
 		pred = model.getOutput(input)
 		err = sum([(p-o)**2.0 for p, o in zip(pred, output)])
 		totalError += err
+		
+		p = interpolatingFunction(input[0], (model.slopes[0][0], model.yInts[0][0]))
+		f.write('%s\t%s\t%s\n' % (input[0], p, output[0]))
+		
+	f.close()
 		
 	averageError = totalError / len(data)
 	
