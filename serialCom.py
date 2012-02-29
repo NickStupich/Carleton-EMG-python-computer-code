@@ -115,24 +115,40 @@ class SerialCommunication(Thread):
 	def Start(self, channels):
 		self.data = FFTInfo(channels)
 		toSend = channels | (1<<7)
-		self.writeByte(toSend)#1 to indicate that it's a start command
-		debug("Wrote start byte")
-		self.isRunning = True
+		success = False
 		
-		#get the acknowledgement before we start the read thread
-		while 1:
-			b = self.ser.read(1)
-			if b:
-				b = ord(b)
-				if b != toSend:
-					raise Exception("Acknowledgement bit received != start command sent. send: %s received: %s" % (toSend, b))
+		for retries in range(3):
+			self.writeByte(toSend)#1 to indicate that it's a start command
+			debug("Wrote start byte")
+			self.isRunning = True
+			#get the acknowledgement before we start the read thread
+			while 1:
+				b = self.ser.read(1)
+				if b:
+					b = ord(b)
+					if b != toSend:
+						print 'Acknowledgement bit received != start command sent. send: %s received: %s' % (toSend, b)
+						self.ser.write(0)	#stop the thing
+						time.sleep(2)		#make sure it has time to stop
+						
+						#then retry
+						
+						#raise Exception("Acknowledgement bit received != start command sent. send: %s received: %s" % (toSend, b))
+					success = True
+					break
+			
+			if success:
+				debug("Received start ack")
+				
+				self.start()
+				debug("started read thread")
+				
 				break
 		
-		debug("Received start ack")
+		if not success:
+			raise Exception("Unable to properly start the bluetooth connection after %s tries" % 3);
 		
-		self.start()
-		debug("started read thread")
-	
+		
 	"""Called continuously to read data while we're running"""
 	def run(self):
 		while self.isRunning:
