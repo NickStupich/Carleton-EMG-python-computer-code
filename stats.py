@@ -99,7 +99,7 @@ def exponentialInterpolation(input, params):
 	return max(0.0, 1.0 - math.exp(-params[0] * input + params[1]))
 	
 def logLinearFit(lx, ly):
-	logx = [math.log(x) for x in lx]
+	logx = [math.log(x) if x> 0 else 1 for x in lx]
 	
 	(scale, offset) = lineOfBestFit(logx, ly)
 	
