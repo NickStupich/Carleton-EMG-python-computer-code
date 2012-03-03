@@ -42,7 +42,7 @@ HOW THIS MONSTROSITY (OF AWESOMENESS) WORKS:
 #this way the algorithm should carry along that spot for a bit before it has to jump into the real thing
 IGNORING_PENALTY_FUNC = lambda r: r * r * 2.0
 
-def dtwAcceptPortionOfInputs(lx, ly, distanceFunc):
+def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclidean):
 	lenX = len(lx)
 	lenY = len(ly)
 	
@@ -64,7 +64,7 @@ def dtwAcceptPortionOfInputs(lx, ly, distanceFunc):
 												results[x][y-1],
 												results[x-1][y-1])
 	
-	if 1:
+	if 0:
 		printCostMatrix(costs)
 		print ' '
 		printCostMatrix(results)
