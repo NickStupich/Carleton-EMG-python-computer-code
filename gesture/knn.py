@@ -23,7 +23,7 @@ class KNNModel():
 					best = (d, sample[0], sample[1])
 			
 			#print best
-			return best[2]
+			return best
 		else:	
 			raise Exception("n>1 not yet implemented")
 				

@@ -1,3 +1,4 @@
+import distances
 
 INFINITY = float('inf')
 
@@ -42,7 +43,9 @@ HOW THIS MONSTROSITY (OF AWESOMENESS) WORKS:
 #this way the algorithm should carry along that spot for a bit before it has to jump into the real thing
 IGNORING_PENALTY_FUNC = lambda r: r * r * 2.0
 
-def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclidean):
+def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclideanDistance):
+	#print 'dtw list 1: ' + str(lx)
+	#print 'dtw list 2: ' + str(ly)
 	lenX = len(lx)
 	lenY = len(ly)
 	
