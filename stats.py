@@ -10,6 +10,9 @@ def covariance(lx, ly):
 def variance(l):
 	u = mean(l)
 	return sum([(i-u)**2.0 for i in l]) / (len(l)-1)
+	
+def stdDev(l):
+	return math.sqrt(variance(l))
 
 def pearson(lx, ly):
 	vx = variance(lx)

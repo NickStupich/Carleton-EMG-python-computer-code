@@ -6,20 +6,33 @@ import knn
 from datetime import datetime
 import functools
 
+NORMALIZE = False
+SUM_ONLY = False
+DISTANCE_TO_PRINT = 2000
+
+l1 = 4
+l2 = 2
+
 def normalizeData(data):
 	#data is a list of lists of ints
 	#transform to a list of lists of floats where the mean value is 1
-	u = stats.mean([stats.mean(d) for d in data])
-	result = [[float(x) / u for x in d] for d in data]
-	return result
+	if NORMALIZE:
+		u = stats.mean([stats.mean(d) for d in data])
+		result = [[float(x) / u for x in d] for d in data]
+		return result
+	else:
+		return data
 
 #extracts information about the likelyhood that a single gesture has been performed
 class GestureRecognizer():
-	def __init__(self, trainingData):
+	def __init__(self, trainingData, baseDtwFunc = dtw.dtwAcceptPortionOfInputs, distanceFunc = distances.euclideanDistance):
 		#need to normalize data...
-		normalized = [(normalizeData(input), output) for input, output in trainingData]
-		self.data = normalized
-		dtwFunction = functools.partial(dtw.dtwAcceptPortionOfInputs, distanceFunc = distances.euclideanDistance)
+		if NORMALIZE:
+			trainingData = [(normalizeData(input), output) for input, output in trainingData]
+		
+		self.data = trainingData
+		dtwFunction = functools.partial(baseDtwFunc, distanceFunc = distanceFunc)
+		
 		self.knnModel = knn.KNNModel(distanceFunction = dtwFunction)
 		#print 'training data: ' + str(self.data[0])
 		self.knnModel.train(self.data)
@@ -32,7 +45,6 @@ class GestureRecognizer():
 		
 		return result
 		
-
 def loadData(filename = '../data2_ringFinger2.txt'):
 	f = open(filename)
 	numOutputs = int(f.readline())
@@ -41,7 +53,10 @@ def loadData(filename = '../data2_ringFinger2.txt'):
 		parts = [int(x) for x in line.split(',')]
 		input = parts[:-numOutputs]
 		output = parts[-numOutputs:]
-		result.append((input, output))
+		if SUM_ONLY:
+			result.append(([sum(input)], output))
+		else:
+			result.append((input, output))
 	
 	f.close()
 	return result
@@ -70,7 +85,7 @@ def testDTW():
 	#print lx, '\n'
 	#print ly, '\n'
 	
-	lx = [[float(x)] for x in [0, 0, 0, 1, 2, 2, 3, 3, 3, 2]]
+	lx = [[float(x)] for x in [0, 0, 0, 1, 2, 3, 3, 2]]
 	ly = [[float(x)] for x in [1, 2, 3, 3, 3, 2, 0, 1]]
 	
 	#print dFunc(lx[-1], ly[6])
@@ -80,11 +95,12 @@ def testDTW():
 	
 	#print distances.euclideanDistance([1.0], [5.0])
 	
-	#dist = dtw.dtwBasic(lx, ly, distances.euclideanDistance)
+	d1 = dtw.dtwBasic(lx, ly, dFunc)
 	#print dist
-	#dist = dtw.dtwAcceptPortionOfInputs(lx, ly, dFunc)
-	#print dist
-	speedTest()
+	d2 = dtw.dtwAcceptPortionOfInputs(lx, ly, dFunc)
+	d3 = dtw.dtwSlopeConstraint(lx, ly, dFunc)
+	print d1, d2, d3
+	#speedTest()
 	
 def testKnn():	
 	training = [[[1, 2, 3], [1]],
@@ -99,13 +115,14 @@ def testKnn():
 """a gesture is defined (for now) as the transition between 0 and 1 on a single output"""
 def extract0to1Gestures(data):
 	gestures = {0: []} #only create gesture 0
-	gestureLength = 5	#5 samples / 20Hz = 0.25 seconds
-	postGestureLength = 3	#time allowed after the gesture was caught in output
+	gestureLength = l1	#5 samples / 20Hz = 0.25 seconds
+	postGestureLength = l2	#time allowed after the gesture was caught in output
 	for i in range(len(data) - gestureLength - postGestureLength):
 		#print data[i+gestureLength-1][1][0], data[i + gestureLength][1][0]
 		if data[i+gestureLength-2][1][0] == 0 and data[i + gestureLength-1][1][0] == 1:
 			gestureData = [d[0] for d in data[i:i+gestureLength + postGestureLength]]	#remove the outputs since we've already associated it with a gesture
-			gestures[0].append(gestureData)
+			normalized = normalizeData(gestureData)
+			gestures[0].append(normalized)
 			
 	return gestures
 	
@@ -144,16 +161,55 @@ def testSystem2():
 	
 	gr = GestureRecognizer(g2)
 	
-	for i in range(15):
-		input = [d[0] for d in data[i:i+5]]
+	for i in range(2, 8):
+		input = [d[0] for d in data[i:i+l1+l2]]
 		#print '\n\n\n' + str(input)
 		distance, input, ouput = gr.getOutput(input)
 		print i, distance
 		#print output
 	
+def testSystem3():
+	data = loadData()
+	
+	gestures = extract0to1Gestures(data)
+	
+	examples = gestures[0][1:]
+	#examples = [(g, 1.0) for g in gestures[0][1:]]#reformat and remove the first one
+	for ex in examples:	print [round(e[0], 2) for e in ex]
+	
+	training = [(g, 1.0) for g in examples]
+	gr = GestureRecognizer(training, baseDtwFunc = dtw.dtwSlopeConstraint)
+	
+	print '\n\n'
+	
+	fout = open('grOutput.txt', 'w')
+	
+	allDistances = []
+	
+	for i in range(l1 + l2, 30000):
+		if i >= len(data): break
+		
+		input = [d[0] for d in data[i-l1-l2:i]]
+		distance, closest, systemOutput = gr.getOutput(input)
+		s = '\t'.join([str(i), str([round(i[0], 2) for i in normalizeData(input)]), str(round(distance, 2))])
+		
+		if distance < DISTANCE_TO_PRINT:
+			print s
+		
+		fout.write(s + '\n')
+		
+		allDistances.append(distance)
+		
+	avDistance = stats.mean(allDistances)
+	stdDevDistance = stats.stdDev(allDistances)
+	
+	print 'average distance: %s with stdDev %s' % (avDistance, stdDevDistance)
+	
+	fout.close()
 
 if __name__ == "__main__":
 	#testDTW()
 	#testKnn()
-	testSystem2()
+	#testSystem2()
+	testSystem3()
 	#testGestureExtraction()
