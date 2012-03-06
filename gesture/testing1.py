@@ -5,45 +5,14 @@ import distances
 import knn
 from datetime import datetime
 import functools
+import time
+from gestureRecognizer import *
 
-NORMALIZE = False
-SUM_ONLY = False
 DISTANCE_TO_PRINT = 2000
 
 l1 = 4
 l2 = 2
 
-def normalizeData(data):
-	#data is a list of lists of ints
-	#transform to a list of lists of floats where the mean value is 1
-	if NORMALIZE:
-		u = stats.mean([stats.mean(d) for d in data])
-		result = [[float(x) / u for x in d] for d in data]
-		return result
-	else:
-		return data
-
-#extracts information about the likelyhood that a single gesture has been performed
-class GestureRecognizer():
-	def __init__(self, trainingData, baseDtwFunc = dtw.dtwAcceptPortionOfInputs, distanceFunc = distances.euclideanDistance):
-		#need to normalize data...
-		if NORMALIZE:
-			trainingData = [(normalizeData(input), output) for input, output in trainingData]
-		
-		self.data = trainingData
-		dtwFunction = functools.partial(baseDtwFunc, distanceFunc = distanceFunc)
-		
-		self.knnModel = knn.KNNModel(distanceFunction = dtwFunction)
-		#print 'training data: ' + str(self.data[0])
-		self.knnModel.train(self.data)
-		
-	def getOutput(self, input):
-		normalized = normalizeData(input)
-		#print normalized
-		
-		result = self.knnModel.predict(normalized)
-		
-		return result
 		
 def loadData(filename = '../data2_ringFinger2.txt'):
 	f = open(filename)
@@ -169,7 +138,7 @@ def testSystem2():
 		#print output
 	
 def testSystem3():
-	data = loadData()
+	data = loadData('../data2.txt')
 	
 	gestures = extract0to1Gestures(data)
 	
@@ -186,6 +155,8 @@ def testSystem3():
 	
 	allDistances = []
 	
+	start = time.time()
+	
 	for i in range(l1 + l2, 30000):
 		if i >= len(data): break
 		
@@ -199,6 +170,10 @@ def testSystem3():
 		fout.write(s + '\n')
 		
 		allDistances.append(distance)
+		
+	#elapsed = time.time() - start
+	#numPoints = len(data) - l1 - l2
+	#print 'took %s for %s points' % (elapsed, numPoints)
 		
 	avDistance = stats.mean(allDistances)
 	stdDevDistance = stats.stdDev(allDistances)

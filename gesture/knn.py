@@ -15,9 +15,10 @@ class KNNModel():
 		
 	def predict(self, test):
 		if self.n == 1:
-			best = (float('inf'), None)
+			best = (float('inf'), None, None)
 			for sample in self.data:
-				d = self.distanceFunction(test, sample[0])
+				#print 'knn: distance between : ', test, sample
+				d = self.distanceFunction(test, sample)
 				#print test, sample, d
 				if d < best[0]:
 					best = (d, sample[0], sample[1])

@@ -45,7 +45,7 @@ def trainCallback(data):
 	trainingData.append((data, keyState))
 	
 def getTrainingData():
-	global channels, numChannels, numOutputs, numHiddenNodes
+	global channels
 	
 	ser = SerialCommunication(trainCallback)	
 	ser.Start(channels)

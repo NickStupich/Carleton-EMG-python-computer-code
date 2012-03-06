@@ -42,3 +42,13 @@ def getNumChannels(channels):
 			numChannels += 1
 	
 	return numChannels
+	
+def normalizeData(data):
+	#data is a list of lists of ints
+	#transform to a list of lists of floats where the mean value is 1
+	if NORMALIZE:
+		u = stats.mean([stats.mean(d) for d in data])
+		result = [[float(x) / u for x in d] for d in data]
+		return result
+	else:
+		return data

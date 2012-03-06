@@ -28,7 +28,6 @@ def makeModel(data):
 		
 		prob = svm_problem(outputs, inputs)
 		param = svm_parameter()
-		#param.svm_type = EPSILON_SVR
 		param.kernel_type = LINEAR
 		
 		#cost parameter - the cost of misclassifying a value.  Increasing will produce a more perfect fit to training data,
