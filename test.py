@@ -3,7 +3,7 @@ import time
 from keyListener import *
 import helpers
 
-channels = sum([x<<i for i, x in enumerate([0, 1, 0, 0, 0, 0])])
+channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
 numChannels = helpers.getNumChannels(channels)
 
 count = 0
@@ -17,6 +17,21 @@ def timingCallback(array):
 	count+=1
 	if count % 100 == 0:
 		print 'updates / second: %s' % (count / (time.time() - start))
+	
+def timingCallback2(array):
+	global start, count
+	if not start:
+		start = time.time()
+		
+	limit = 100
+		
+	count += 1
+	if count == limit:
+		now = time.time()
+		count = 0
+		elapsed = now - start
+		start = now
+		print 'updates / second: %s' % (limit / elapsed)
 	
 i=0
 def callback(array):
@@ -38,8 +53,8 @@ def train():
 	print 'training...'
 		
 def main():
-	ser = SerialCommunication(callback)
-	#ser = SerialCommunication(timingCallback)
+	#ser = SerialCommunication(callback)
+	ser = SerialCommunication(timingCallback2)
 	#ser = SerialCommunication(toFileCallback)
 	
 	ser.Start(channels)
@@ -57,12 +72,5 @@ class KeyTestThread(Thread):
 			time.sleep(0.5)
 			print kl.getOutputs()
 	
-def main2():
-	ktt = KeyTestThread()
-	ktt.start()
-	
-	while 1:
-		time.sleep(1)
-
 if __name__ == "__main__":	
 	main()
