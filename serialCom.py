@@ -5,7 +5,7 @@ import helpers
 from helpers import FOURIER_BINS, NUM_CHANNELS
 
 #serial port details
-_port = "COM26"
+_port = "COM24"
 _baud = 57600
 
 #delay once the serial port read() doesn't immediately return anything (in seconds)
