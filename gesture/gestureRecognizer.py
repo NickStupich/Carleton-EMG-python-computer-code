@@ -1,36 +1,33 @@
-import distances
-import knn
-import dtw
-import functools
-import helpers
+"""this builds off the gesture distance calculator, by using it.
+Idea is to turn the distance from the gesture distance generated
+by the distance calculator to output a boolean value of whether or not the 
+gesture was likely to have been performed
 
-NORMALIZE = False
-SUM_ONLY = True
+taking subsections of training data and testing on the subsequent data,
+we can find the mean distance between the actual gesture, and between
+the non-gesture training data and the gestures.  With these two sets of 
+distance, we find the mean distance and standard deviations to 
+determine an appropriate dividing line between the two classes.  
 
-def normalizeData(data):
-	if NORMALIZE:
-		return helpers.normalizeData(data)
-	else:
-		return data
+Then at runtime it's gesture? = (minGestureDistance < dividingLine)
 
-#extracts information about the likelyhood that a single gesture has been performed
+"""
+
+from gestureDistanceCalculator import *
+
+TESTING_FOLDS = 4	#number of times to break up the data and find distances
+
+def calculateDividingLine(gestures, notGestures):
+	numFolds = min(TESTING_FOLDS, len(gestures))
+	
+
 class GestureRecognizer():
-	def __init__(self, trainingData, baseDtwFunc = dtw.dtwAcceptPortionOfInputs, distanceFunc = distances.euclideanDistance):
-		#need to normalize data...
-		if NORMALIZE:
-			trainingData = [(normalizeData(input), output) for input, output in trainingData]
-		
-		self.data = trainingData
-		dtwFunction = functools.partial(baseDtwFunc, distanceFunc = distanceFunc)
-		
-		self.knnModel = knn.KNNModel(distanceFunction = dtwFunction)
-		#print 'training data: ' + str(self.data[0])
-		self.knnModel.train(self.data)
+	def __init__(self, gestures, notGestures):
+		self.gestures = gestures
+		self.distanceCalculator = GestureDistanceCalculator(self.gestures)
+		self.dividingLine = calculateDividingLine(self.gestures, notGestures)
 		
 	def getOutput(self, input):
-		normalized = normalizeData(input)
-		#print normalized
-		
-		result = self.knnModel.predict(normalized)
-		
-		return result
+		minDistance = self.distanceCalculator.getOutput(input)
+		isGesture = (minDistance < self.dividingLine)
+		return isGesture
