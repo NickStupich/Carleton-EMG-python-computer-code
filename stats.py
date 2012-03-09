@@ -109,7 +109,7 @@ def logLinearFit(lx, ly):
 	return (scale, offset)
 	
 def logLinearInterpolation(input, params):
-	return math.log(input) * params[0] + params[1]
+	return (math.log(input) if input > 0 else -1) * params[0] + params[1]
 	
 if __name__ == "__main__":
 	l1 = [0, 1, 2]

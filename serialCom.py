@@ -105,7 +105,7 @@ class SerialCommunication(Thread):
 	def __init__(self, newInfoCallback = None):
 		Thread.__init__(self)
 		self._callback = newInfoCallback
-		self.ser = serial.Serial(port = _port, baudrate = _baud, timeout = 0)#opens automatically
+		self.ser = serial.Serial(port = _port, baudrate = _baud, timeout = 1)#opens automatically
 		debug("Opened connection")
 		self.dataReceived = []
 		
@@ -115,21 +115,33 @@ class SerialCommunication(Thread):
 	def Start(self, channels):
 		self.data = FFTInfo(channels)
 		toSend = channels | (1<<7)
-		self.writeByte(toSend)#1 to indicate that it's a start command
-		debug("Wrote start byte")
-		self.isRunning = True
 		
-		#get the acknowledgement before we start the read thread
-		while 1:
-			b = self.ser.read(1)
-			if b:
-				b = ord(b)
-				if b != toSend:
-					raise Exception("Acknowledgement bit received != start command sent. send: %s received: %s" % (toSend, b))
+		connected = False
+		for i in range(3):#retries to start
+			self.writeByte(toSend)#1 to indicate that it's a start command
+			debug("Wrote start byte")
+			
+			#get the acknowledgement before we start the read thread
+			while 1:
+				self.isRunning = True
+				b = self.ser.read(1)
+				if b:
+					b = ord(b)
+					if b != toSend:
+						print "Acknowledgement bit received != start command sent. send: %s received: %s" % (toSend, b)
+						self.ser.write(chr(0))
+						self.ser.read(1000)#1 second timeout, read all the crap thats there
+						break
+					else:
+						debug("Received start ack")
+						connected = True
+						break
+			
+			if connected:
 				break
 		
-		debug("Received start ack")
-		
+		if not connected:
+			raise Exception("Failed to connect after all retries")
 		self.start()
 		debug("started read thread")
 	

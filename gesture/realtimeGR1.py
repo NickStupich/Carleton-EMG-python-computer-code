@@ -124,7 +124,7 @@ def main():
 	state = programState.WAITING
 	time.sleep(1)
 	
-	gestures, maybeGestures = extractGestures1(trainingData)
+	gestures, maybeGestures = extractGesturesAndMaybe1(trainingData)
 	
 	gesture0 = gestures[0]	#SHITTY!!!
 	maybeGestures0 = maybeGestures[0]
