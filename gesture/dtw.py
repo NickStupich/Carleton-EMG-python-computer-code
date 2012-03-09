@@ -1,4 +1,5 @@
 import distances
+import stats
 
 INFINITY = float('inf')
 
@@ -43,7 +44,7 @@ HOW THIS MONSTROSITY (OF AWESOMENESS) WORKS:
 #this way the algorithm should carry along that spot for a bit before it has to jump into the real thing
 IGNORING_PENALTY_FUNC = lambda r: r * r * 2.0
 
-def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclideanDistance, ignorePenalty = 1):
+def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclideanDistance):
 	#print 'dtw list 1: ' + str(lx)
 	#print 'dtw list 2: ' + str(ly)
 	lenX = len(lx)
@@ -51,12 +52,18 @@ def dtwAcceptPortionOfInputs(lx, ly, distanceFunc = distances.euclideanDistance,
 	
 	costs = [[distanceFunc(lx[x], ly[y]) for y in range(lenY)] for x in range(lenX)]
 	
+	average = stats.mean(reduce(lambda x, y: x + y, lx + ly))
+	
+	weightConstant = 1.0
+	
+	penaltyWeighting = average * weightConstant
+	
 	for x in range(lenX):
-		costs[x][0] += IGNORING_PENALTY_FUNC(float(x) / lenX) * ignorePenalty
-		costs[x][-1] += IGNORING_PENALTY_FUNC((lenX - float(x)-1) / lenX) * ignorePenalty
+		costs[x][0] += IGNORING_PENALTY_FUNC(float(x) / lenX) * penaltyWeighting
+		costs[x][-1] += IGNORING_PENALTY_FUNC((lenX - float(x)-1) / lenX) * penaltyWeighting
 	for y in range(lenY):
-		costs[0][y] += IGNORING_PENALTY_FUNC(float(y) / lenY) * ignorePenalty
-		costs[-1][y] += IGNORING_PENALTY_FUNC((lenY - float(y)-1) / lenY) * ignorePenalty
+		costs[0][y] += IGNORING_PENALTY_FUNC(float(y) / lenY) * penaltyWeighting
+		costs[-1][y] += IGNORING_PENALTY_FUNC((lenY - float(y)-1) / lenY) * penaltyWeighting
 		
 	#initializing with costs means that the top\left row\column work out
 	results = [[costs[x][y] for y in range(lenY)] for x in range(lenX)]

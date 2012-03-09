@@ -30,7 +30,11 @@ class GestureDistanceCalculator():
 	def getOutput(self, input):
 		normalized = normalizeData(input)
 		#print normalized
+		#print input
 		
 		result = self.knnModel.predict(normalized)
 		
 		return result
+
+	def getDistance(self, input):
+		return self.getOutput(input)[0]

@@ -6,7 +6,9 @@ import knn
 from datetime import datetime
 import functools
 import time
-from gestureRecognizer import *
+import gestureRecognizer
+import realtimeGR1
+import gestureDistanceCalculator
 
 DISTANCE_TO_PRINT = 2000
 
@@ -22,7 +24,7 @@ def loadData(filename = '../data2_ringFinger2.txt'):
 		parts = [int(x) for x in line.split(',')]
 		input = parts[:-numOutputs]
 		output = parts[-numOutputs:]
-		if SUM_ONLY:
+		if 0:
 			result.append(([sum(input)], output))
 		else:
 			result.append((input, output))
@@ -90,7 +92,7 @@ def extract0to1Gestures(data):
 		#print data[i+gestureLength-1][1][0], data[i + gestureLength][1][0]
 		if data[i+gestureLength-2][1][0] == 0 and data[i + gestureLength-1][1][0] == 1:
 			gestureData = [d[0] for d in data[i:i+gestureLength + postGestureLength]]	#remove the outputs since we've already associated it with a gesture
-			normalized = normalizeData(gestureData)
+			normalized = gestureDistanceCalculator.normalizeData(gestureData)
 			gestures[0].append(normalized)
 			
 	return gestures
@@ -124,30 +126,32 @@ def testSystem1():
 	
 def testSystem2():
 	data = loadData()
-	gestures = extract0to1Gestures(data)
+	gestures = realtimeGR1.extractGestures1(data)
 	
 	g2 = [(g, 1.0) for g in gestures[0][1:]]#reformat and remove the first one
 	
-	gr = GestureRecognizer(g2)
+	gr = gestureDistanceCalculator.GestureDistanceCalculator(g2)
 	
 	for i in range(2, 8):
 		input = [d[0] for d in data[i:i+l1+l2]]
+		#print input
 		#print '\n\n\n' + str(input)
 		distance, input, ouput = gr.getOutput(input)
 		print i, distance
 		#print output
 	
 def testSystem3():
-	data = loadData('../data2.txt')
+	data = loadData()
 	
-	gestures = extract0to1Gestures(data)
+	gestures, maybeGestures = realtimeGR1.extractGesturesAndMaybe1(data)
 	
 	examples = gestures[0][1:]
+	maybeExamples = maybeGestures[0]
 	#examples = [(g, 1.0) for g in gestures[0][1:]]#reformat and remove the first one
 	for ex in examples:	print [round(e[0], 2) for e in ex]
 	
 	training = [(g, 1.0) for g in examples]
-	gr = GestureRecognizer(training, baseDtwFunc = dtw.dtwSlopeConstraint)
+	gr = gestureDistanceCalculator.GestureDistanceCalculator(training)
 	
 	print '\n\n'
 	
@@ -162,7 +166,7 @@ def testSystem3():
 		
 		input = [d[0] for d in data[i-l1-l2:i]]
 		distance, closest, systemOutput = gr.getOutput(input)
-		s = '\t'.join([str(i), str([round(i[0], 2) for i in normalizeData(input)]), str(round(distance, 2))])
+		s = '\t'.join([str(i), str([round(i[0], 2) for i in gestureDistanceCalculator.normalizeData(input)]), str(round(distance, 2))])
 		
 		if distance < DISTANCE_TO_PRINT:
 			print s
@@ -182,9 +186,30 @@ def testSystem3():
 	
 	fout.close()
 
+def testGestureRecognizer():
+	data = loadData()
+	gesturesDict, maybeGesturesDict = realtimeGR1.extractGesturesAndMaybe1(data)
+	gestures = gesturesDict[0]
+	maybeGestures = maybeGesturesDict[0]
+	#print maybeGestures
+	nonGestures = realtimeGR1.extractNonGestures(data)
+	
+	
+	
+	print 'lengths:', len(gestures), len(maybeGestures), len(nonGestures)
+	
+	gr = gestureRecognizer.GestureRecognizer(gestures, maybeGestures, nonGestures)
+	
+def testNonGestureExtraction():
+	data = loadData()
+	gestures = realtimeGR1.extractGestures1(data)[0]
+	
+	
 if __name__ == "__main__":
 	#testDTW()
 	#testKnn()
 	#testSystem2()
-	testSystem3()
+	#testSystem3()
 	#testGestureExtraction()
+	#testNonGestureExtraction()
+	testGestureRecognizer()

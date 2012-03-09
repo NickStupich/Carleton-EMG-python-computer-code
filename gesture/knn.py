@@ -16,9 +16,16 @@ class KNNModel():
 	def predict(self, test):
 		if self.n == 1:
 			best = (float('inf'), None, None)
-			for sample in self.data:
+			for sampleMaybeTuple in self.data:
 				#print 'knn: distance between : ', test, sample
+				#print sample
+				if type(sampleMaybeTuple) == type(()):
+					sample = sampleMaybeTuple[0]
+				else:
+					sample = sampleMaybeTuple
+				
 				d = self.distanceFunction(test, sample)
+
 				#print test, sample, d
 				if d < best[0]:
 					best = (d, sample[0], sample[1])
