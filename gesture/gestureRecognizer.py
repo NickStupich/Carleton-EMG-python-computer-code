@@ -53,11 +53,9 @@ def calculateDividingLine(gestures, maybeGestures, nonGestures):
 		#break
 		
 	#print len(allGestureDistances), len(allNonGestureDistances)
-	print stats.mean(allGestureDistances)
-	print stats.mean(allNonGestureDistances)
+	print 'means: ', stats.mean(allGestureDistances), stats.mean(allNonGestureDistances)
 	
-	print stats.stdDev(allGestureDistances)
-	print stats.stdDev(allNonGestureDistances)
+	print 'std devs: ', stats.stdDev(allGestureDistances), stats.stdDev(allNonGestureDistances)
 	
 	meanGesture = stats.mean(allGestureDistances)
 	meanNon = stats.mean(allNonGestureDistances)
@@ -75,9 +73,10 @@ class GestureRecognizer():
 		self.distanceCalculator = gestureDistanceCalculator.GestureDistanceCalculator(gestures)
 		#print nonGestures
 		self.dividingLine = calculateDividingLine(gestures, maybeGestures, nonGestures)
+		#print gestures
 		
 	def getOutput(self, input):
-		minDistance = self.distanceCalculator.getOutput(input)
+		minDistance = self.distanceCalculator.getDistance(input)
 		isGesture = (minDistance < self.dividingLine)
 		#return the distance as well to make debugging a little easier
 		return isGesture, minDistance

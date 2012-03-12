@@ -32,7 +32,7 @@ def makeModel(data):
 		
 		#cost parameter - the cost of misclassifying a value.  Increasing will produce a more perfect fit to training data,
 		#but that may not generalize as well.  lowering seems to reduce training time, without a significant reduction in accuracy (sometimes increased)
-		param.C = 0.01
+		param.C = 0.001
 		
 		model = svm_train(prob, param)
 		models.append(model)

@@ -12,8 +12,8 @@ import gestureDistanceCalculator
 
 DISTANCE_TO_PRINT = 2000
 
-l1 = 4
-l2 = 2
+l1 = 2
+l2 = 4
 
 		
 def loadData(filename = '../data2_ringFinger2.txt'):
@@ -141,7 +141,7 @@ def testSystem2():
 		#print output
 	
 def testSystem3():
-	data = loadData()
+	data = loadData(filename = '../data.txt')
 	
 	gestures, maybeGestures = realtimeGR1.extractGesturesAndMaybe1(data)
 	
@@ -187,7 +187,7 @@ def testSystem3():
 	fout.close()
 
 def testGestureRecognizer():
-	data = loadData()
+	data = loadData(filename = '../data2.txt')
 	gesturesDict, maybeGesturesDict = realtimeGR1.extractGesturesAndMaybe1(data)
 	gestures = gesturesDict[0]
 	maybeGestures = maybeGesturesDict[0]
@@ -199,6 +199,8 @@ def testGestureRecognizer():
 	print 'lengths:', len(gestures), len(maybeGestures), len(nonGestures)
 	
 	gr = gestureRecognizer.GestureRecognizer(gestures, maybeGestures, nonGestures)
+	
+	print 'dividing line: %s' % (gr.dividingLine)
 	
 def testNonGestureExtraction():
 	data = loadData()

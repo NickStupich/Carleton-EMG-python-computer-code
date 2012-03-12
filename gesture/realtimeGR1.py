@@ -10,7 +10,8 @@ from keyListener import *
 import sys
 import helpers
 import time
-from gestureDistanceCalculator import *
+import gestureDistanceCalculator
+import gestureRecognizer
 
 channels = sum([x<<i for i, x in enumerate([1, 0, 0, 0, 0, 0])])
 numChannels = helpers.getNumChannels(channels)
@@ -127,7 +128,7 @@ def main():
 	gestures, maybeGestures = extractGesturesAndMaybe1(trainingData)
 	
 	gesture0 = gestures[0]	#SHITTY!!!
-	maybeGestures0 = maybeGestures[0]
+	maybeGesture0 = maybeGestures[0]
 	nonGesture = extractNonGestures(trainingData)
 	
 	modelGR = gestureRecognizer.GestureRecognizer(gesture0, maybeGesture0, nonGesture)
@@ -136,7 +137,7 @@ def main():
 	formattedGesture0 = [(g, 1.0) for g in gesture0]#get the data structure require by the gesture recognizer
 	print formattedGesture0
 	
-	modelGR = GestureDistanceCalculator(gesture0)
+	modelGR = gestureDistanceCalculator.GestureDistanceCalculator(gesture0)
 	"""
 	state = programState.RUNNING
 	
